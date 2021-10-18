@@ -1,15 +1,12 @@
-import logo from "./logo.svg";
-import "./App.css";
+// import logo from "./logo.svg";
+import "../../App.css";
 import React, { useState, useEffect } from "react";
-import { CalendarHeader } from "./components/CalendarHeader/CalendarHeader";
-import { Day } from "./components/Day/Day";
-import { NewEventModal } from "./components/NewEventModal/NewEventModal";
-import { DeleteEventModal } from "./components/DeleteEventModal/DeleteEventModal";
-import { useDate } from "./components/Hooks/useDate";
-import MonthView from "./components/MonthView/MonthView";
-import YearView from "./components/Yeariew/YearView";
-
-function App() {
+import { CalendarHeader } from "../CalendarHeader/CalendarHeader";
+import { Day } from "../Day/Day";
+import { NewEventModal } from "../NewEventModal/NewEventModal";
+import { DeleteEventModal } from "../DeleteEventModal/DeleteEventModal";
+import { useDate } from "../Hooks/useDate";
+const YearView = () => {
   const [nav, setNav] = useState(0);
   const [clicked, setClicked] = useState();
   const [events, setEvents] = useState(
@@ -17,8 +14,7 @@ function App() {
       ? JSON.parse(localStorage.getItem("events"))
       : []
   );
-  const [view, setView] = useState("year")
-  const arrayTwo = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const arrayTwo = ["January", 1, 2, 3, 4, 5, 6, 7, 8, "October", 10, 11];
 
   const eventForDate = (date) => events.find((e) => e.date === date);
 
@@ -132,14 +128,69 @@ function App() {
 
   return (
     <div>
- <button onClick={()=>setView("year")} id="backButton">Year</button>
-        <button onClick={()=>setView("month")} id="nextButton">Month</button>
-        {
-         view && view === "year" ? <YearView></YearView>: <MonthView></MonthView>
-        }
-  
+      <div className="calendar">
+        {years.map((mt) => (
+          <div id="container">
+            <h1>{mt.monthName}</h1>
+            <div id="weekdays">
+              <div>Sunday</div>
+              <div>Monday</div>
+              <div>Tuesday</div>
+              <div>Wednesday</div>
+              <div>Thursday</div>
+              <div>Friday</div>
+              <div>Saturday</div>
+            </div>
+
+            <div id="calendar">
+              {mt.daysArr.map((d, index) => (
+                <Day
+                  key={index}
+                  day={d}
+                  onClick={() => {
+                    if (d.value !== "padding") {
+                      setClicked(d.date);
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {clicked && !eventForDate(clicked) && (
+        // clicked &&
+        <NewEventModal
+          date={clicked}
+          onClose={() => setClicked(null)}
+          onSave={(title, endDate) => {
+            setEvents([...events, { title, date: clicked, endDate: endDate }]);
+            setClicked(null);
+            /*Here I will fetch my Calendar api */
+            // fetch()
+          }}
+        />
+      )}
+
+      {clicked && eventForDate(clicked) && (
+        <DeleteEventModal
+          eventText={
+            eventForDate(clicked).title +
+            " " +
+            "Start Date: " +
+            eventForDate(clicked).date +
+            " End Date: " +
+            eventForDate(clicked).endDate
+          }
+          onClose={() => setClicked(null)}
+          onDelete={() => {
+            setEvents(events.filter((e) => e.date !== clicked));
+            setClicked(null);
+          }}
+        />
+      )}
     </div>
   );
-}
-
-export default App;
+};
+export default YearView;
